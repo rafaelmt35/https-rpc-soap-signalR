@@ -1,0 +1,57 @@
+﻿@{
+    ViewData["Title"] = "Chat";
+}
+
+
+<h1>SignalR</h1>
+
+<hr />
+
+<div class="container">
+        <label>Name:</label>
+        <input type="text" id="displayName"/>
+    <br />   
+        <label>Message:</label>
+        <input type="text" id="message"/>
+        <br />
+        <input type="button" id="sendmessage" value="Send"/>
+
+
+        <ul id="discussion"></ul>
+    
+</div>
+
+@section scripts{
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7.0.12/dist/browser/signalr.min.js"></script>
+    <script type="text/javascript">
+        var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
+
+        connection.start().catch(function (err){
+            return console.error(err.toString());
+        });
+
+        document.getElementById("sendmessage").addEventListener("click",function(event){
+            var user = document.getElementById("displayName").value;
+            var message = document.getElementById("message").value;
+
+            connection.invoke("SendMessage",user,message).catch(function(err){
+                return console.error(err.toString());
+
+            });
+            event.preventDefault();
+        });
+
+        connection.on("ReceiveMessage",function(user,message){
+            var encodedMsg = user + ": " + message;
+            var li = document.createElement("li");
+
+            li.textContent = encodedMsg;
+            document.getElementById("discussion").appendChild(li);
+        });
+
+    </script>
+}
+
+
+
+
